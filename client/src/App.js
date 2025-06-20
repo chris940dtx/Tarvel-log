@@ -4,7 +4,10 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { listLogEntries } from "./API";
 import LogEntryForm from "./LogEntryForm";
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> 4fb4c1c55f24e2e99187d26abd5b1ae5693b7bb2
 const getMarkerSize = (zoom) => {
   // Base size is 24px (matching your SVG viewBox), increases as zoom increases
   // Minimum size is 16px to ensure visibility
