@@ -4,10 +4,6 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { listLogEntries } from "./API";
 import LogEntryForm from "./LogEntryForm";
 
-// Debug environment variables
-console.log('Environment Variables Debug:');
-console.log('REACT_APP_API_URL:', process.env.REACT_APP_API_URL);
-console.log('REACT_APP_MAPBOX_ACCESS_TOKEN:', process.env.REACT_APP_MAPBOX_ACCESS_TOKEN ? 'SET' : 'NOT SET');
 
 const getMarkerSize = (zoom) => {
   // Base size is 24px (matching your SVG viewBox), increases as zoom increases
