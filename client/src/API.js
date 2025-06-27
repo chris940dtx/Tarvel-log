@@ -28,5 +28,12 @@ export async function createLogEntry(entry) {
 }
 
 export async function deleteLogEntry(id){
-
+const baseUrl = API_URL.replace(/\/$/,'');
+const response = await fetch (`${baseUrl}/api/logs/${id}`,{
+  method: "DELETE",
+});
+if (!response.ok) {
+  throw new Error(`Failed to delete log entry with id ${id}`);
+}
+return response.json();
 }

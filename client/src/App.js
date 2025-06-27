@@ -3,6 +3,7 @@ import Map, { Marker, Popup } from "react-map-gl/mapbox";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { listLogEntries } from "./API";
 import LogEntryForm from "./LogEntryForm";
+import { deleteLogEntry } from "./API";
 
 const getMarkerSize = (zoom) => {
   return Math.max(16, 24 + zoom * 2);
@@ -21,6 +22,16 @@ const App = () => {
   const getEntries = async () => {
     const logEntries = await listLogEntries();
     setLogEntries(logEntries);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await deleteLogEntry(id);
+      getEntries();
+    } catch (error) {
+      console.log("Failed to delete entry: ", error);
+    }
+    setShowPopup({});
   };
 
   useEffect(() => {
@@ -88,6 +99,19 @@ const App = () => {
                     <img src={entry.image} alt={entry.title} />
                   ) : null}
                 </div>{" "}
+                <button
+                  onClick={() => handleDelete(entry._id)}
+                  style={{
+                    marginTop: "10px",
+                    background: "red",
+                    color: "white",
+                    border: "none",
+                    padding: "5px 10px",
+                    cursor: "pointer",
+                  }}
+                >
+                  Delete
+                </button>
               </div>
             </Popup>
           )}

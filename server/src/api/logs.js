@@ -26,4 +26,16 @@ router.post("/", async (req, res, next) => {
   }
 });
 
+router.delete("/:id", async (req, res, next) => {
+  try {
+    const deletedEntry = await LogEntry.findByIdAndDelete(req.params.id);
+    if (!deletedEntry) {
+      return res.status(404).json({ message: "Log entry not found" });
+    }
+    res.json(deletedEntry);
+  } catch (error) {
+    next(error);
+  }
+});
+
 module.exports = router;
