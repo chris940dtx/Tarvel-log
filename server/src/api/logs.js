@@ -1,4 +1,5 @@
 const { Router } = require("express");
+const mongoose = require("mongoose");
 
 const LogEntry = require("../models/LogEntry");
 
@@ -28,6 +29,8 @@ router.post("/", async (req, res, next) => {
 
 router.delete("/:id", async (req, res, next) => {
   try {
+    console.log('Attempting to delete ID:', req.params.id);
+    console.log('Current DB:', mongoose.connection.name);
     const deletedEntry = await LogEntry.findByIdAndDelete(req.params.id);
     if (!deletedEntry) {
       return res.status(404).json({ message: "Log entry not found" });

@@ -26,10 +26,14 @@ const App = () => {
 
   const handleDelete = async (id) => {
     try {
+      console.log('Deleting entry with id:', id);
+      console.log('API URL:', process.env.REACT_APP_API_URL);
       await deleteLogEntry(id);
-      getEntries();
+      console.log('Delete successful, refreshing entries...');
+      await getEntries();
+      console.log('Entries refreshed');
     } catch (error) {
-      console.log("Failed to delete entry: ", error);
+      console.error('Delete failed:', error);
     }
     setShowPopup({});
   };
