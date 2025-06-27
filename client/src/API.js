@@ -27,13 +27,35 @@ export async function createLogEntry(entry) {
   return response.json();
 }
 
-export async function deleteLogEntry(id){
-const baseUrl = API_URL.replace(/\/$/,'');
-const response = await fetch (`${baseUrl}/api/logs/${id}`,{
-  method: "DELETE",
-});
-if (!response.ok) {
-  throw new Error(`Failed to delete log entry with id ${id}`);
-}
-return response.json();
+export async function deleteLogEntry(id) {
+  const baseUrl = API_URL.replace(/\/$/, '');
+  const url = `${baseUrl}/api/logs/${id}`;
+  
+  console.log('=== DELETE REQUEST DEBUG ===');
+  console.log('Attempting to delete entry at:', url);
+  console.log('Entry ID:', id);
+  console.log('ID type:', typeof id);
+  console.log('ID length:', id.length);
+  
+  try {
+    const response = await fetch(url, {
+      method: "DELETE",
+    });
+    
+    console.log('Response status:', response.status);
+    console.log('Response ok:', response.ok);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('Error response body:', errorText);
+      throw new Error(`Failed to delete log entry with id ${id}. Status: ${response.status}. Response: ${errorText}`);
+    }
+    
+    const result = await response.json();
+    console.log('Delete successful, result:', result);
+    return result;
+  } catch (error) {
+    console.log('Fetch error:', error);
+    throw error;
+  }
 }
