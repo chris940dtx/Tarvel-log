@@ -1,0 +1,10 @@
+.guest-button {
+  width: "100%";
+  padding: "12px";
+  backgroundcolor: "#6f42c1";
+  color: "white";
+  border: "none";
+  borderradius: "4px";
+  cursor: "pointer";
+  margintop: "10px";
+}
