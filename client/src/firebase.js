@@ -7,14 +7,20 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+console.log("=== FIREBASE DEBUG ===");
+console.log("API Key:", process.env.REACT_APP_FIREBASE_API_KEY);
+console.log("Project ID:", process.env.REACT_APP_FIREBASE_PROJECT_ID);
+console.log("Auth Domain:", process.env.REACT_APP_FIREBASE_AUTH_DOMAIN);
+console.log("=========================");
+
 const firebaseConfig = {
-  apiKey: "AIzaSyB6DluZ3E3MoOLRZ_8gorAEuhroJlVzrU0",
-  authDomain: "travel-log-cefee.firebaseapp.com",
-  projectId: "travel-log-cefee",
-  storageBucket: "travel-log-cefee.firebasestorage.app",
-  messagingSenderId: "226385690885",
-  appId: "1:226385690885:web:fc8fef3a2c44f2ad58376c",
-  measurementId: "G-FXLMJV7Z3E"
+  apiKey: process.env.REACT_APP_FIREBASE_API_KEY,
+  authDomain: process.env.REACT_APP_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.REACT_APP_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.REACT_APP_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.REACT_APP_FIREBASE_APP_ID,
+  measurementId: process.env.REACT_APP_FIREBASE_MEASUREMENT_ID
 };
 
 // Initialize Firebase
