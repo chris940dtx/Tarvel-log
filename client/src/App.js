@@ -45,16 +45,20 @@ const App = () => {
   // so that when we reach the protected routes it still allows the guest user since
   // its an object with "user" properties.
   const createGuestUser = () => {
+    console.log("  createGuestUser function called")
     const guestUser = {
       isGuest: true,
       uid: `guest-${Date.now()}`,
       email: `guest-${Date.now()}@example.com`,
       displayName: "Guest User",
     };
+
+    console.log(" Created guest user object:", guestUser);
     //to have guestUser survive refresh, set to localStorage.
     setUser(guestUser);
     localStorage.setItem("isGuest", "true");
     localStorage.setItem("guestUser", JSON.stringify(guestUser));
+    console.log("Guest user set in state and localStorage");
   };
 
   const clearGuestMode = () => {
@@ -118,6 +122,10 @@ const App = () => {
       latitude: event.lngLat.lat,
     });
   };
+
+  console.log(" About to render Routes");
+console.log(" createGuestUser function:", createGuestUser);
+console.log(" Type of createGuestUser:", typeof createGuestUser);
 
   return (
     <div>
