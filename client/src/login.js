@@ -192,9 +192,17 @@ function Login(props) {
         <button
           type="button"
           onClick={() => {
+            console.log(" Checking props.onCreateGuest:", props.onCreateGuest);
+            console.log(" Type of onCreateGuest:", typeof props.onCreateGuest);
+
             if (props.onCreateGuest) {
               props.onCreateGuest();
+              console.log("navigating");
               navigate("/");
+              console.log("navigation command sent");
+            } else {
+              console.log("ERROR: onCreateGuest prop is missing!");
+              console.log("Available props:", Object.keys(props));
             }
           }}
           className="guest-button"
