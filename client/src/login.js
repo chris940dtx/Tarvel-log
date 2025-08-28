@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "./firebase";
-import { Navigate, useNavigate, useNavigation } from "react-router-dom";
 import styles from "./Login.module.css";
 import { useGuest } from "./GuestContext";
+import { useNavigate } from "react-router-dom";
 
-function Login(props) {
-  const{ createGuestUser } = useGuest();
+function Login() {
+  const { createGuestUser } = useGuest();
 
   const {
     register,
@@ -195,17 +195,19 @@ function Login(props) {
         <button
           type="button"
           onClick={() => {
-            console.log(" Checking createGuestUser from context:", createGuestUser);
-            console.log(" Type of onCreateGuest:", typeof props.onCreateGuest);
+            console.log(
+              " Checking createGuestUser from context:",
+              createGuestUser
+            );
+            console.log("Type of createGuestUser:", typeof createGuestUser);
 
             if (createGuestUser) {
+              console.log("Calling createGuestUser...");
               createGuestUser();
-              console.log("navigating");
+              console.log("Navigating to /");
               navigate("/");
-              console.log("navigation command sent");
             } else {
-              console.log("ERROR: onCreateGuest prop is missing!");
-              console.log("Available props:", Object.keys(props));
+              console.log("ERROR: createGuestUser is missing from context!");
             }
           }}
           className="guest-button"
