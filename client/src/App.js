@@ -74,7 +74,7 @@ const App = () => {
     const isGuest = localStorage.getItem("isGuest");
     const guestUser = localStorage.getItem("guestUser");
 
-    if (isGuest && guestUser) {
+    if (isGuest && guestUser && !auth.currentUser) {
       // if it was in guest mode then:
       setUser(JSON.parse(guestUser));
       setLoading(false);
@@ -84,7 +84,15 @@ const App = () => {
     //when the user logs in or out or sessiosn chnages it updates with new usr obj
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       console.log("Auth state changed:", currentUser);
-      setUser(currentUser);
+      
+      if (currentUser){
+        localStorage.removeItem("isGuest");
+        localStorage.removeItem("guestUser");
+        setUser(currentUser);
+      } else {
+        setUser(null);
+      }
+
       setLoading(false);
     });
     return () => unsubscribe(); // clean up function
@@ -142,6 +150,8 @@ const App = () => {
                     // Clear any stored data
                     localStorage.removeItem("firebaseToken");
                     localStorage.removeItem("user");
+                    localStorage.removeItem("isGuest");
+                    localStorage.removeItem("guestUser");
                     // Redirect to login
                     window.location.href = "/login";
                   })
