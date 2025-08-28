@@ -11,6 +11,7 @@ import { auth } from "./firebase";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import "./App.css";
+import { GuestProvider } from "./GuestContext";
 
 function PrivateRoute({ user, loading, children }) {
   console.log("PrivateRoute - user:", user, "loading:", loading);
@@ -45,7 +46,7 @@ const App = () => {
   // so that when we reach the protected routes it still allows the guest user since
   // its an object with "user" properties.
   const createGuestUser = () => {
-    console.log("  createGuestUser function called")
+    console.log("  createGuestUser function called");
     const guestUser = {
       isGuest: true,
       uid: `guest-${Date.now()}`,
@@ -124,177 +125,179 @@ const App = () => {
   };
 
   console.log(" About to render Routes");
-console.log(" createGuestUser function:", createGuestUser);
-console.log(" Type of createGuestUser:", typeof createGuestUser);
+  console.log(" createGuestUser function:", createGuestUser);
+  console.log(" Type of createGuestUser:", typeof createGuestUser);
 
   return (
-    <div>
-      {user && (
-        <>
-          <button
-            onClick={() => {
-              auth
-                .signOut()
-                .then(() => {
-                  console.log("User signed out successfully");
-                  // Clear any stored data
-                  localStorage.removeItem("firebaseToken");
-                  localStorage.removeItem("user");
-                  // Redirect to login
-                  window.location.href = "/login";
-                })
-                .catch((error) => {
-                  console.error("Error signing out:", error);
-                });
-            }}
-            className="logout-button"
-          >
-            Logout
-          </button>
+    <GuestProvider createGuestUser={createGuestUser}>
+      <div>
+        {user && (
+          <>
+            <button
+              onClick={() => {
+                auth
+                  .signOut()
+                  .then(() => {
+                    console.log("User signed out successfully");
+                    // Clear any stored data
+                    localStorage.removeItem("firebaseToken");
+                    localStorage.removeItem("user");
+                    // Redirect to login
+                    window.location.href = "/login";
+                  })
+                  .catch((error) => {
+                    console.error("Error signing out:", error);
+                  });
+              }}
+              className="logout-button"
+            >
+              Logout
+            </button>
 
-          {user &&
-            user.isGuest && ( // will only show if user is guest
-              <div className="guest-mode-indicator">
-                Guest Mode - Entries saved locally only
-              </div>
-            )}
-        </>
-      )}
-      <Routes>
-        <Route
-          path="/login"
-          element={<Login onCreateGuest={createGuestUser} />}
-        />
-        <Route
-          path="/register"
-          element={<Register onCreateGuest={createGuestUser} />}
-        />
-        <Route
-          path="/"
-          element={
-            <PrivateRoute user={user} loading={loading}>
-              <Map
-                mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
-                initialViewState={viewport}
-                onMove={(evt) => setViewport(evt.viewState)}
-                style={{ width: "100vw", height: "100vh", overflow: "hidden" }}
-                mapStyle="mapbox://styles/chrisarias/cmb5n6ffd00tp01qyeyyr08zm"
-                onDblClick={showAddMarkerPopup}
-              >
-                {logEntries.map((entry) => (
-                  <React.Fragment key={entry._id}>
-                    <Marker
-                      longitude={entry.longitude}
-                      latitude={entry.latitude}
-                    >
-                      <div
-                        onClick={() => setShowPopup({ [entry._id]: true })}
-                        style={{ cursor: "pointer" }}
-                      >
-                        <svg
-                          className="marker"
-                          viewBox="0 0 24 24"
-                          height={getMarkerSize(viewport.zoom)}
-                          width={getMarkerSize(viewport.zoom)}
-                          strokeWidth="2"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                          <circle cx="12" cy="10" r="3"></circle>
-                        </svg>
-                      </div>
-                    </Marker>
-                    {showPopup[entry._id] && (
-                      <Popup
+            {user &&
+              user.isGuest && ( // will only show if user is guest
+                <div className="guest-mode-indicator">
+                  Guest Mode - Entries saved locally only
+                </div>
+              )}
+          </>
+        )}
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute user={user} loading={loading}>
+                <Map
+                  mapboxAccessToken={process.env.REACT_APP_MAPBOX_ACCESS_TOKEN}
+                  initialViewState={viewport}
+                  onMove={(evt) => setViewport(evt.viewState)}
+                  style={{
+                    width: "100vw",
+                    height: "100vh",
+                    overflow: "hidden",
+                  }}
+                  mapStyle="mapbox://styles/chrisarias/cmb5n6ffd00tp01qyeyyr08zm"
+                  onDblClick={showAddMarkerPopup}
+                >
+                  {logEntries.map((entry) => (
+                    <React.Fragment key={entry._id}>
+                      <Marker
                         longitude={entry.longitude}
                         latitude={entry.latitude}
+                      >
+                        <div
+                          onClick={() => setShowPopup({ [entry._id]: true })}
+                          style={{ cursor: "pointer" }}
+                        >
+                          <svg
+                            className="marker"
+                            viewBox="0 0 24 24"
+                            height={getMarkerSize(viewport.zoom)}
+                            width={getMarkerSize(viewport.zoom)}
+                            strokeWidth="2"
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                          </svg>
+                        </div>
+                      </Marker>
+                      {showPopup[entry._id] && (
+                        <Popup
+                          longitude={entry.longitude}
+                          latitude={entry.latitude}
+                          anchor="bottom"
+                          onClose={() => setShowPopup({})}
+                          closeButton={true}
+                          closeOnClick={false}
+                          button
+                        >
+                          <div style={{ padding: "10px" }}>
+                            <h3>{entry.title}</h3>
+                            <p>{entry.description}</p>
+                            <small>
+                              Visited on:{" "}
+                              {new Date(entry.visitDate).toLocaleDateString()}
+                            </small>
+                            <div
+                              style={{ maxWidth: "100%", overflow: "hidden" }}
+                            >
+                              {entry.image ? (
+                                <img src={entry.image} alt={entry.title} />
+                              ) : null}
+                            </div>{" "}
+                            <button
+                              onClick={() => handleDelete(entry._id)}
+                              style={{
+                                marginTop: "10px",
+                                background: "red",
+                                color: "white",
+                                border: "none",
+                                padding: "5px 10px",
+                                cursor: "pointer",
+                              }}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </Popup>
+                      )}
+                    </React.Fragment>
+                  ))}
+                  {addEntryLocation ? (
+                    <>
+                      <Marker
+                        longitude={addEntryLocation.longitude}
+                        latitude={addEntryLocation.latitude}
+                      >
+                        <div>
+                          <svg
+                            className="marker-red"
+                            viewBox="0 0 24 24"
+                            height={getMarkerSize(viewport.zoom)}
+                            width={getMarkerSize(viewport.zoom)}
+                            strokeWidth="2"
+                            fill="none"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                          </svg>
+                        </div>
+                      </Marker>
+                      <Popup
+                        className="popup"
+                        longitude={addEntryLocation.longitude}
+                        latitude={addEntryLocation.latitude}
                         anchor="bottom"
-                        onClose={() => setShowPopup({})}
+                        onClose={() => setAddEntryLocation(null)}
                         closeButton={true}
                         closeOnClick={false}
-                        button
                       >
                         <div style={{ padding: "10px" }}>
-                          <h3>{entry.title}</h3>
-                          <p>{entry.description}</p>
-                          <small>
-                            Visited on:{" "}
-                            {new Date(entry.visitDate).toLocaleDateString()}
-                          </small>
-                          <div style={{ maxWidth: "100%", overflow: "hidden" }}>
-                            {entry.image ? (
-                              <img src={entry.image} alt={entry.title} />
-                            ) : null}
-                          </div>{" "}
-                          <button
-                            onClick={() => handleDelete(entry._id)}
-                            style={{
-                              marginTop: "10px",
-                              background: "red",
-                              color: "white",
-                              border: "none",
-                              padding: "5px 10px",
-                              cursor: "pointer",
+                          <LogEntryForm
+                            onCLose={() => {
+                              setAddEntryLocation(null);
+                              getEntries();
                             }}
-                          >
-                            Delete
-                          </button>
+                            location={addEntryLocation}
+                          />
                         </div>
                       </Popup>
-                    )}
-                  </React.Fragment>
-                ))}
-                {addEntryLocation ? (
-                  <>
-                    <Marker
-                      longitude={addEntryLocation.longitude}
-                      latitude={addEntryLocation.latitude}
-                    >
-                      <div>
-                        <svg
-                          className="marker-red"
-                          viewBox="0 0 24 24"
-                          height={getMarkerSize(viewport.zoom)}
-                          width={getMarkerSize(viewport.zoom)}
-                          strokeWidth="2"
-                          fill="none"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        >
-                          <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
-                          <circle cx="12" cy="10" r="3"></circle>
-                        </svg>
-                      </div>
-                    </Marker>
-                    <Popup
-                      className="popup"
-                      longitude={addEntryLocation.longitude}
-                      latitude={addEntryLocation.latitude}
-                      anchor="bottom"
-                      onClose={() => setAddEntryLocation(null)}
-                      closeButton={true}
-                      closeOnClick={false}
-                    >
-                      <div style={{ padding: "10px" }}>
-                        <LogEntryForm
-                          onCLose={() => {
-                            setAddEntryLocation(null);
-                            getEntries();
-                          }}
-                          location={addEntryLocation}
-                        />
-                      </div>
-                    </Popup>
-                  </>
-                ) : null}
-              </Map>
-            </PrivateRoute>
-          }
-        />
-      </Routes>
-    </div>
+                    </>
+                  ) : null}
+                </Map>
+              </PrivateRoute>
+            }
+          />
+        </Routes>
+      </div>
+    </GuestProvider>
   );
 };
 

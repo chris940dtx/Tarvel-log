@@ -4,8 +4,11 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "./firebase";
 import { Navigate, useNavigate, useNavigation } from "react-router-dom";
 import styles from "./Login.module.css";
+import { useGuest } from "./GuestContext";
 
 function Login(props) {
+  const{ createGuestUser } = useGuest();
+
   const {
     register,
     handleSubmit,
@@ -192,11 +195,11 @@ function Login(props) {
         <button
           type="button"
           onClick={() => {
-            console.log(" Checking props.onCreateGuest:", props.onCreateGuest);
+            console.log(" Checking createGuestUser from context:", createGuestUser);
             console.log(" Type of onCreateGuest:", typeof props.onCreateGuest);
 
-            if (props.onCreateGuest) {
-              props.onCreateGuest();
+            if (createGuestUser) {
+              createGuestUser();
               console.log("navigating");
               navigate("/");
               console.log("navigation command sent");
