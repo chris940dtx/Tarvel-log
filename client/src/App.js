@@ -6,7 +6,7 @@ import LogEntryForm from "./LogEntryForm";
 import { deleteLogEntry } from "./API";
 import Register from "./register";
 import Login from "./login";
-import { onAuthStateChanged } from "firebase/auth";
+import { onAuthStateChanged, signInAnonymously } from "firebase/auth";
 import { auth } from "./firebase";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Navigate } from "react-router-dom";
@@ -45,54 +45,22 @@ const App = () => {
   // Guest user is still a "user" but it has the properties hard coded essantially
   // so that when we reach the protected routes it still allows the guest user since
   // its an object with "user" properties.
-  const createGuestUser = () => {
+  const createGuestUser = async () => {
     console.log("  createGuestUser function called");
-    const guestUser = {
-      isGuest: true,
-      uid: `guest-${Date.now()}`,
-      email: `guest-${Date.now()}@example.com`,
-      displayName: "Guest User",
-    };
-
-    console.log(" Created guest user object:", guestUser);
-    //to have guestUser survive refresh, set to localStorage.
-    setUser(guestUser);
-    localStorage.setItem("isGuest", "true");
-    localStorage.setItem("guestUser", JSON.stringify(guestUser));
-    console.log("Guest user set in state and localStorage");
-  };
-
-  const clearGuestMode = () => {
-    setUser(null);
-    localStorage.removeItem("isGuest");
-    localStorage.removeItem("guestUser");
-    localStorage.removeItem("guestEntries");
+    try {
+      const result = await signInAnonymously(auth);
+      console.log("anonymous user created:", result.user);
+    } catch (error) {
+      console.error("Failed to create anonymous user:", error);
+    }
   };
 
   useEffect(() => {
-    //checking if user was in guest mode before
-    const isGuest = localStorage.getItem("isGuest");
-    const guestUser = localStorage.getItem("guestUser");
-
-    if (isGuest && guestUser && !auth.currentUser) {
-      // if it was in guest mode then:
-      setUser(JSON.parse(guestUser));
-      setLoading(false);
-      return;
-    }
-
     //when the user logs in or out or sessiosn chnages it updates with new usr obj
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       console.log("Auth state changed:", currentUser);
-      
-      if (currentUser){
-        localStorage.removeItem("isGuest");
-        localStorage.removeItem("guestUser");
-        setUser(currentUser);
-      } else {
-        setUser(null);
-      }
 
+      setUser(currentUser);
       setLoading(false);
     });
     return () => unsubscribe(); // clean up function
@@ -101,8 +69,21 @@ const App = () => {
   console.log("Current user state:", user);
   console.log("Loading state:", loading);
   const getEntries = async () => {
-    const logEntries = await listLogEntries();
-    setLogEntries(logEntries);
+    try {
+      const logEntries = await listLogEntries();
+      setLogEntries(logEntries);
+    } catch (error) {
+      console.log("Failed to fetch entries:", error);
+
+      if (
+        error.message === "UNAUTHORIZED" ||
+        error.message === "UNAUTHENTICATED"
+      ) {
+        alert("session has expired. Log in again.");
+      } else {
+        alert("failed to load entries. Please check connection.");
+      }
+    }
   };
 
   const handleDelete = async (id) => {
@@ -120,10 +101,10 @@ const App = () => {
   };
 
   useEffect(() => {
-    (async () => {
+    if (user && !loading) {
       getEntries();
-    })();
-  }, []);
+    }
+  }, [user, loading]);
 
   const showAddMarkerPopup = (event) => {
     setAddEntryLocation({
@@ -131,10 +112,6 @@ const App = () => {
       latitude: event.lngLat.lat,
     });
   };
-
-  console.log(" About to render Routes");
-  console.log(" createGuestUser function:", createGuestUser);
-  console.log(" Type of createGuestUser:", typeof createGuestUser);
 
   return (
     <GuestProvider createGuestUser={createGuestUser}>
@@ -147,11 +124,6 @@ const App = () => {
                   .signOut()
                   .then(() => {
                     console.log("User signed out successfully");
-                    // Clear any stored data
-                    localStorage.removeItem("firebaseToken");
-                    localStorage.removeItem("user");
-                    localStorage.removeItem("isGuest");
-                    localStorage.removeItem("guestUser");
                     // Redirect to login
                     window.location.href = "/login";
                   })
@@ -165,10 +137,8 @@ const App = () => {
             </button>
 
             {user &&
-              user.isGuest && ( // will only show if user is guest
-                <div className="guest-mode-indicator">
-                  Guest Mode - Entries saved locally only
-                </div>
+              user.isAnonymous && ( // will only show if user is guest
+                <div className="guest-mode-indicator">Guest Mode Activated</div>
               )}
           </>
         )}
@@ -291,7 +261,7 @@ const App = () => {
                       >
                         <div style={{ padding: "10px" }}>
                           <LogEntryForm
-                            onCLose={() => {
+                            onClose={() => {
                               setAddEntryLocation(null);
                               getEntries();
                             }}

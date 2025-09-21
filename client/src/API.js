@@ -1,3 +1,10 @@
+//API.js - The "Data Layer"
+// This is the data access layer - handles all communication with server:
+// getAuthToken() - Gets the Firebase token from the current user
+// listLogEntries() - Fetches all log entries from the server
+// createLogEntry() - Creates a new log entry on the server
+// deleteLogEntry() - Deletes a log entry from the server
+
 import { auth } from "./firebase";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:1337";
@@ -12,9 +19,10 @@ const getAuthToken = async () => {
 
 export async function listLogEntries() {
   try {
-    const token = await getAuthToken();
+    const token = await getAuthToken(); //gets the token
     const baseUrl = API_URL.replace(/\/$/, "");
 
+    //makes GET request
     const response = await fetch(`${baseUrl}/api/logs`, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -22,12 +30,21 @@ export async function listLogEntries() {
     });
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      const errorText = await response.text();
+
+      if (response.status === 401) {
+        throw Error("UNAUTHORIZED");
+      }
+      if (response.status === 403) {
+        throw new Error("FORBIDDEN");
+      }
+      throw new Error(`HTTP error: ${response.status} ${errorText}`);
     }
+
     return response.json();
   } catch (error) {
     console.error("Error fetching logs:", error);
-    return []; // Return empty array instead of throwing
+    throw error; // re-throw error
   }
 }
 

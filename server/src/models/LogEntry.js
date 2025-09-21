@@ -1,4 +1,4 @@
-const mongoose = require("mongoose"); 
+const mongoose = require("mongoose");
 
 const { Schema } = mongoose;
 
@@ -11,7 +11,7 @@ const logEntrySchema = new Schema({
   title: {
     type: String,
     required: true,
-  }, 
+  },
   description: String,
   comments: String,
   image: String,
@@ -35,7 +35,11 @@ const logEntrySchema = new Schema({
     required: true,
     type: Date,
   },
- 
+  uid: {
+    type: String,
+    required: true,
+    index: true,
+  },
 });
 
 const LogEntry = mongoose.model("LogEntry", logEntrySchema);

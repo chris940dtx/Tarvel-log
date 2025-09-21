@@ -89,11 +89,7 @@ function Register(props) {
       // Show success message
       setSuccessMessage("Registration successful! Redirecting to login...");
 
-      // Store Firebase token and user data
-      if (result.token) {
-        localStorage.setItem("firebaseToken", result.token);
-        localStorage.setItem("user", JSON.stringify(result.user));
-      }
+      
 
       setTimeout(() => {
         console.log("Redirecting to map...");

@@ -84,12 +84,6 @@ function Login() {
       // Show success message
       setSuccessMessage("Login successful! Redirecting...");
 
-      // Store Firebase token and user data
-      if (result.token) {
-        localStorage.setItem("firebaseToken", result.token);
-        localStorage.setItem("user", JSON.stringify(result.user));
-      }
-
       // Optional: Redirect after delay
       setTimeout(() => {
         // You can add navigation logic here
@@ -194,7 +188,7 @@ function Login() {
         </button>
         <button
           type="button"
-          onClick={() => {
+          onClick={async () => {
             console.log(
               " Checking createGuestUser from context:",
               createGuestUser
@@ -203,7 +197,7 @@ function Login() {
 
             if (createGuestUser) {
               console.log("Calling createGuestUser...");
-              createGuestUser();
+              await createGuestUser();
               console.log("Navigating to /");
               navigate("/");
             } else {
